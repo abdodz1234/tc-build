@@ -10,6 +10,14 @@ jobs:
   build-toolchain:
     executor: arch_executor
     steps:
+       - run:
+          name: Install dependencies
+          command: |
+            pacman -Sy --needed --noconfirm archlinux-keyring
+            pacman -Syu --needed --noconfirm base-devel \
+              bc bison ccache clang cpio cmake flex git libelf \
+              lld llvm ninja openssl python3 patchelf
+
       - checkout
       - run:
           name: Clone and build
