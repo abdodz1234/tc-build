@@ -23,7 +23,7 @@ jobs:
           name: Clone and build
           command: |
             pacman -Sy --needed  --noconfirm  archlinux-keyring git
-            git clone https://github.com/ClangBuiltLinux/tc-build.git
+            git clone git@github.com:abdodz1234/tc-build.git
             cd tc-build
             bash build-toolchain.sh
 
