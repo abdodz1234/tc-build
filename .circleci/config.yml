@@ -4,7 +4,7 @@ executors:
   arch_executor:
     docker:
       - image: archlinux:latest
-    resource_class: X-large
+    resource_class: large
 
 jobs:
   build-toolchain:
