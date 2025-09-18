@@ -10,6 +10,7 @@ jobs:
   build-toolchain:
     executor: arch_executor
     steps:
+       - checkout
        - run:
           name: Install dependencies
           command: |
@@ -18,8 +19,7 @@ jobs:
               bc bison ccache clang cpio cmake flex git libelf \
               lld llvm ninja openssl python3 patchelf
 
-      - checkout
-      - run:
+       - run:
           name: Clone and build
           command: |
             pacman -Sy --needed  --noconfirm  archlinux-keyring git
