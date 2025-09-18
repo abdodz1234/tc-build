@@ -1,0 +1,25 @@
+version: 2.1
+
+executors:
+  arch_executor:
+    docker:
+      - image: archlinux:latest
+    resource_class: large
+
+jobs:
+  build-toolchain:
+    executor: arch_executor
+    steps:
+      - checkout
+      - run:
+          name: Clone and build
+          command: |
+            git clone https://github.com/ClangBuiltLinux/tc-build.git
+            cd tc-build
+            bash build-toolchain.sh
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build-toolchain
