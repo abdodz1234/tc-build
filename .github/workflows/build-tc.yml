@@ -31,7 +31,7 @@ jobs:
             base-devel \
             bc bison ccache clang cpio cmake \
             flex git libelf lld llvm ninja \
-            openssl python python-patchelf
+            openssl python python-pypatchelf patchelf
 
       - name: Checkout repo
         uses: actions/checkout@v4
