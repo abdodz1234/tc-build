@@ -31,7 +31,7 @@ msg "Building LLVM..."
 	--vendor-string "Ghost " \
 	--targets ARM AArch64 X86  \
 	-s \
-	--lto thin -i /workspace/rust/tc-build/install
+	--lto thin -i ./install
 
 # Build binutils
 msg "Building binutils..."
