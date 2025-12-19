@@ -1,0 +1,63 @@
+name: Build Clang (tc-build, Arch, ccache)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+
+    container:
+      image: archlinux:latest
+      options: --privileged
+
+    env:
+      GH_RUN_ID: ${{ github.run_id }}
+      CCACHE_DIR: /workspace/.ccache
+      CCACHE_MAXSIZE: 10G
+
+    steps:
+      - name: Init pacman
+        run: |
+          pacman -Sy --noconfirm archlinux-keyring
+          pacman -Syu --noconfirm
+
+      - name: Install dependencies
+        run: |
+          pacman -S --needed --noconfirm \
+            base-devel \
+            bc bison ccache clang cpio cmake \
+            flex git libelf lld llvm ninja \
+            openssl python python-patchelf
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: /workspace/.ccache
+          key: ccache-arch-${{ github.ref }}
+          restore-keys: |
+            ccache-arch-
+
+      - name: Build toolchain
+        run: |
+          chmod +x build.sh
+          ./build.sh
+
+      - name: Show ccache stats
+        run: ccache -s
+
+      - name: Package toolchain
+        run: |
+          tar -C install -cJf clang-toolchain.tar.xz .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: clang-toolchain
+          path: clang-toolchain.tar.xz
