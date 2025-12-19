@@ -35,7 +35,7 @@ msg "Building LLVM..."
 
 # Build binutils
 msg "Building binutils..."
-./build-binutils.py --targets arm aarch64 x86_64 -i /workspace/rust/tc-build/install
+./build-binutils.py --targets arm aarch64 x86_64 -i ./install
 
 # Remove unused products
 msg "Removing unused products..."
