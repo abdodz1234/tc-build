@@ -2,6 +2,15 @@ name: Build Clang (tc-build, Arch, ccache)
 
 on:
   workflow_dispatch:
+    inputs:
+      release_name:
+        description: "Release name"
+        required: false
+        default: "Clang Toolchain Build"
+      prerelease:
+        description: "Mark as prerelease"
+        type: boolean
+        default: true
 
 jobs:
   build:
@@ -21,7 +30,7 @@ jobs:
       - name: Init pacman
         run: |
           echo "total core: $(nproc)"
-          pacman-key --init 
+          pacman-key --init
           pacman-key --populate archlinux
           pacman -Sy --noconfirm archlinux-keyring
           pacman -Syu --noconfirm
@@ -59,8 +68,16 @@ jobs:
         run: |
           tar -C install -cJf clang-toolchain.tar.xz .
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      # -------------------------------
+      # Create GitHub Release
+      # -------------------------------
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: clang-toolchain
-          path: clang-toolchain.tar.xz
+          tag_name: clang-${{ github.run_id }}
+          name: ${{ inputs.release_name }} (Run ${{ github.run_id }})
+          prerelease: ${{ inputs.prerelease }}
+          files: |
+            clang-toolchain.tar.xz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
