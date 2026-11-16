@@ -1,0 +1,102 @@
+name: Build Clang (tc-build, Ubuntu 22.04, ccache)
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_name:
+        description: "Release name"
+        required: false
+        default: "Clang Toolchain Build"
+      prerelease:
+        description: "Mark as prerelease"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+
+    container:
+      image: ubuntu:22.04
+      options: --privileged
+
+    env:
+      GH_RUN_ID: ${{ github.run_id }}
+      CCACHE_DIR: /workspace/.ccache
+      CCACHE_MAXSIZE: 10G
+      DEBIAN_FRONTEND: noninteractive
+
+    steps:
+      - name: Install dependencies
+        run: |
+          echo "total core: $(nproc)"
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            bc \
+            binutils-dev \
+            bison \
+            build-essential \
+            ca-certificates \
+            ccache \
+            clang \
+            cmake \
+            cpio \
+            curl \
+            file \
+            flex \
+            git \
+            libelf-dev \
+            libssl-dev \
+            libxml2-dev \
+            lld \
+            llvm \
+            ninja-build \
+            patchelf \
+            python3 \
+            python-is-python3 \
+            texinfo \
+            xz-utils \
+            zlib1g-dev
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: /workspace/.ccache
+          key: ccache-ubuntu22-${{ github.ref }}
+          restore-keys: |
+            ccache-ubuntu22-
+
+      - name: Build toolchain
+        run: |
+          chmod +x build-toolchain.sh
+          ./build-toolchain.sh
+
+      - name: Show ccache stats
+        run: ccache -s
+
+      - name: Package toolchain
+        run: |
+          tar -C install -cJf clang-toolchain.tar.xz .
+
+      # -------------------------------
+      # Create GitHub Release
+      # -------------------------------
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: clang-${{ github.run_id }}
+          name: ${{ inputs.release_name }} (Run ${{ github.run_id }})
+          prerelease: ${{ inputs.prerelease }}
+          files: |
+            clang-toolchain.tar.xz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
