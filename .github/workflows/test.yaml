@@ -1,0 +1,38 @@
+name: Build Clang (tc-build, Arch, ccache)
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_name:
+        description: "Release name"
+        required: false
+        default: "Clang Toolchain Build"
+      prerelease:
+        description: "Mark as prerelease"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Create dummy archive for testing
+        run: echo "test" > clang-toolchain.tar.xz
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: clang-${{ github.run_id }}
+          name: ${{ inputs.release_name }} (Run ${{ github.run_id }})
+          prerelease: ${{ inputs.prerelease }}
+          files: |
+            clang-toolchain.tar.xz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
