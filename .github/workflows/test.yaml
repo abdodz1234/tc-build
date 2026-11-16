@@ -1,4 +1,4 @@
-name: Build Clang (tc-build, Arch, ccache)
+name: Build Clang (test)
 
 on:
   workflow_dispatch:
